@@ -114,6 +114,8 @@ const palettes = defineCollection({
     style: z.enum(['light', 'dark', 'mixed']),
     format: z.enum(['css-variables', 'tailwind', 'other']),
     discoveredFrom: z.string().optional(),
+    /** 原文链接，便于收录去重（与 check:palettes 同源检测） */
+    sourceUrl: z.string().url().optional(),
     discoveredAt: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     searchKeywords: z.array(z.string()).default([]),

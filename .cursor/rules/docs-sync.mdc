@@ -1,0 +1,23 @@
+---
+description: Keep docs in sync when changing site structure or behavior
+globs:
+  - src/**/*
+  - astro.config.mjs
+  - docs/**/*
+alwaysApply: true
+---
+
+# 文档与代码同步
+
+改动手册中列出的范围时，**同一变更内**更新 `docs/HANDBOOK.md` 与 `docs/AGENTS.md`（必要时 `docs/templates/`）：
+
+- Content Collection 增删、Zod schema / frontmatter 字段
+- `src/pages/` 路由、资源筛选、导航、页脚、首页 feed
+- `site.config.ts` 站名/描述/社交
+- `astro.config.mjs` 的 `site` URL 或构建方式
+
+仅编辑 `src/content/` 单篇正文且未动 schema/路由时，不必改手册。
+
+**新增配色：** 必须先 `npm run check:palettes` 通过（重复 id / 标题 / 色值组合会失败）。
+
+对照 HANDBOOK 第一节「文档与代码同步」表自检后再完成提交。

@@ -4,27 +4,44 @@
 
 ---
 
+## 文档与代码同步（必读）
+
+**凡改动影响站点行为、路由、内容 schema、导航或维护流程的代码，必须在同一变更中更新文档。**
+
+| 改了什么 | 应更新 |
+|----------|--------|
+| 新增/删除 Content Collection、字段 | 本文第三节 meta、`content.config.ts` 注释、[templates/](templates/) |
+| 新增/删除页面路由、筛选逻辑 | 本文第二节目录、第四节（资源筛选）、[AGENTS.md](AGENTS.md) |
+| 首页入口、feed、导航、页脚 | 本文第一、四节；`site.config.ts` 若改描述/社交 |
+| 部署 URL、构建命令 | 本文第六节定案表、`astro.config.mjs` |
+| 仅改单篇内容 | 只改 `src/content/`，一般不必改手册 |
+
+Agent 与人类维护者均遵守；PR / 提交前对照上表自检。
+
+---
+
 ## 一、整体怎么分模块
 
-站点 = **一个 Astro 静态站** + **四类内容（Content Collections）** + **若干静态页**。
+站点 = **一个 Astro 静态站** + **五类内容（Content Collections）** + **壳子（导航 / 主题 / 搜索 / 页脚）**。
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  壳子：布局 / 导航 / 主题(明亮·暗黑·系统) / 搜索 / 字体   │
+│  壳子：布局 / 导航 / 主题 / 搜索 / 页脚(社交链接)        │
 ├─────────────────────────────────────────────────────────┤
-│  首页 (E)：四入口 + 「最近动态」混排                      │
-├──────────┬──────────┬──────────┬──────────────────────┤
-│  notes   │  docs    │ resources│  palettes            │
-│  笔记    │  文档    │  资源    │  配色（仅列表+JSON）  │
-└──────────┴──────────┴──────────┴──────────────────────┘
+│  首页 (E)：五入口 + 「最近动态」混排                      │
+├──────────┬──────────┬──────────┬──────────┬────────────┤
+│  notes   │  docs    │ projects │ resources│  palettes  │
+│  笔记    │  文档    │  作品    │  资源    │  配色      │
+└──────────┴──────────┴──────────┴──────────┴────────────┘
 ```
 
 | 模块 | 用途 | 典型内容 | 列表 | 详情页 |
 |------|------|----------|------|--------|
 | **notes** | 开发/学习随记、踩坑、短文 | 今天试了 Convex | `/notes` | 有 |
 | **docs** | 系统整理、对比、教程笔记 | Auth 选型、部署备忘 | `/docs` | 有（TOC 由 meta 控制） |
-| **resources** | 发现的库/服务/工具/npm | Clerk、nuqs、Lucide | `/resources` | **无（v1 仅列表）** |
-| **palettes** | 收藏的中国色/参考配色 | 只此青绿、某落地页色 | `/palettes` | **无（v1 仅列表）** |
+| **projects** | 个人开发与开源作品 | chronovia-desk | `/projects` | 有 |
+| **resources** | 发现的库/服务/工具/npm | Clerk、nuqs、Pexels | `/resources` | **无单条详情**；有类型/分类筛选页 |
+| **palettes** | 收藏的中国色/参考配色 | 只此青绿 | `/palettes` | **无（v1 仅列表）** |
 
 ### 站点主题 vs 配色收藏（必须分离）
 
@@ -35,61 +52,83 @@
 
 首页 **不展示** 配色条；配色仅在「配色」栏目查看。
 
+### 全站页脚与社交
+
+- 组件：`src/components/SiteFooter.astro`
+- 配置：`src/site.config.ts` → `author`、`social[]`（`label`、`href`、`icon`）
+- 新增社交平台：扩展 `social` 数组；新图标类型需在 `SiteFooter.astro` 增加对应 SVG 分支
+
 ---
 
-## 二、推荐目录结构（实现后）
+## 二、推荐目录结构
 
 ```text
 src/
   content/
     notes/*.mdx
     docs/*.mdx
-    resources/*.md
+    projects/*.mdx
+    resources/**/*.md          # 可用子目录，如 inspiration/
     palettes/*.md
   content.config.ts
+  site.config.ts               # 站名、描述、作者、社交链接
   layouts/
-    BaseLayout.astro
+    BaseLayout.astro           # Header + main + Footer
     PostLayout.astro
     DocLayout.astro
-    ListLayout.astro
+    ProjectLayout.astro
+  components/
+    SiteHeader.astro
+    SiteFooter.astro
+    ResourcesTable.astro
+    ResourcesFilterBar.astro
   pages/
     index.astro
     notes/...
     docs/...
+    projects/index.astro
+    projects/[...slug].astro
     resources/index.astro
+    resources/type/[type].astro
+    resources/category/[category].astro
+    resources/type/[type]/category/[category].astro
     palettes/index.astro
     search.astro
-    palettes/[id].json.ts   # Agent 用 JSON，建议保留
+    palettes/[id].json.ts
+    palettes/index.json.ts
+  lib/
+    collections.ts
+    feed.ts
+    resources.ts               # 筛选 URL、枚举、排序
   styles/global.css
-public/fonts/
-public/favicon.svg          # 主图标（随系统明暗）
-public/favicon.ico          # 明亮模式回退
-public/favicon-dark.ico     # 暗黑模式回退
-docs/                       # 本手册与模板
+public/
+  favicon.svg, favicon.ico, favicon-dark.ico
+docs/
+  HANDBOOK.md                  # 本手册
+  AGENTS.md
+  templates/
 ```
 
 ---
 
 ## 三、各模块 Meta（frontmatter）
 
-实现时用 Zod 校验。**(必填)** 表示建议必填。
+实现时用 Zod 校验（`src/content.config.ts`）。**(必填)** 表示 schema 要求。
 
 ### 1. `notes` — 笔记
 
 ```yaml
-title: (必填) 显示标题
-description: (必填) 摘要，列表/搜索用
+title: (必填)
+description: (必填)
 pubDate: (必填) 2025-05-22
 updatedDate: 可选
 tags: [] 可选
-draft: false 可选，true 则不构建、不列表
+draft: false 可选
 series: 可选
 seriesOrder: 可选
 ```
 
-**正文：** 过程、结论、代码片段、踩坑。使用 **MDX**。
-
-**更新：** 在 `src/content/notes/` 新建 `slug.mdx`。
+**正文：** MDX。**更新：** `src/content/notes/<slug>.mdx`，模板 [templates/note.mdx](templates/note.mdx)。
 
 ---
 
@@ -102,26 +141,47 @@ pubDate: (必填)
 updatedDate: 可选
 tags: [] 可选
 draft: false 可选
-toc: true | false   # 是否显示目录（按篇控制）
+toc: true | false
 order: 可选
-sidebar: 可选       # 侧栏分组，如「部署」
+sidebar: 可选
 ```
 
-**正文：** 长文、对比、步骤。`toc: true` 用于多标题长文；`toc: false` 用于短文。
-
-**更新：** `src/content/docs/xxx.mdx`。
+**正文：** MDX。**更新：** `src/content/docs/<slug>.mdx`，模板 [templates/doc.mdx](templates/doc.mdx)。
 
 ---
 
-### 3. `resources` — 资源（v1 仅列表）
+### 3. `projects` — 作品
 
 ```yaml
 title: (必填)
-description: (必填) 一句：是什么、为什么记
+description: (必填)
+github: (必填) 项目仓库 URL
+cover: (必填) 列表卡片封面图 URL
+coverAlt: 可选
+downloadUrl: 可选  如 Releases
+stack: [] 可选
+status: active | maintenance | archived  默认 active
+pubDate: (必填)
+updatedDate: 可选
+tags: [] 可选
+draft: false 可选
+```
+
+**列表：** 左图右文卡片。**详情：** `ProjectLayout` 含 GitHub / 下载按钮 + MDX 正文。
+
+**更新：** `src/content/projects/<slug>.mdx`，模板 [templates/project.mdx](templates/project.mdx)。
+
+---
+
+### 4. `resources` — 资源
+
+```yaml
+title: (必填)
+description: (必填)
 url: (必填)
 type: (必填) ui | icons | npm | service | tool | template | article
 category: (必填) auth | database | backend | storage | email | payments | observability | ai | styling | utils
-stack: [] 可选，如 [nodejs, nextjs]
+stack: [] 可选
 status: (必填) bookmarked | tried | using | deprecated
 discoveredFrom: 可选
 discoveredAt: (必填)
@@ -133,23 +193,29 @@ searchKeywords: [] 可选
 draft: false 可选
 ```
 
-**列表展示（无详情页）：** 依赖 frontmatter，勿把关键信息只写正文。
+**列表：** 表格（名称、类型、分类、状态、日期）；类型/分类可点击筛选。**无单条详情页。**
 
-| status | 含义 |
-|--------|------|
-| bookmarked | 先收藏 |
-| tried | 试过 |
-| using | 在用 |
-| deprecated | 不再推荐 |
+**筛选路由（可组合，AND）：**
 
-**模板文件：** [templates/resource.md](templates/resource.md)
+| URL | 含义 |
+|-----|------|
+| `/resources` | 全部 |
+| `/resources/type/{type}` | 仅类型 |
+| `/resources/category/{category}` | 仅分类 |
+| `/resources/type/{type}/category/{category}` | 类型 + 分类（仅生成内容中存在的组合） |
+
+筛选条可单独移除某一维或「清除全部」。枚举与 URL 生成见 `src/lib/resources.ts`。
+
+**子目录：** 如 `resources/inspiration/*.md` 仅作文件组织，`category` 仍须符合 schema。
+
+**模板：** [templates/resource.md](templates/resource.md)
 
 ---
 
-### 4. `palettes` — 配色（v1 仅列表 + Agent JSON）
+### 5. `palettes` — 配色
 
 ```yaml
-id: (必填) 稳定 slug，如 zhici-qinglv，勿随意改
+id: (必填) 稳定 slug
 title: (必填)
 description: (必填)
 style: light | dark | mixed
@@ -164,42 +230,35 @@ gradients: 可选
 usage: 可选
 ```
 
-**colors 每项：**
+构建后 **`/palettes/{id}.json`** 供 Agent 引用。**模板：** [templates/palette.md](templates/palette.md)
 
-```yaml
-colors:
-  - name: 石青
-    role: background | surface | text | muted | border | accent | accent-secondary | highlight | other
-    hex: "#1e4d5c"
-```
+**收录去重（必做）：** 新增或批量导入配色后运行 `npm run check:palettes`（`npm run build` 会自动执行）。脚本检查：
 
-**usage 示例（给 Agent / Pencil）：**
+| 检查项 | 失败时 |
+|--------|--------|
+| `id` 唯一 | 报错，禁止构建 |
+| `title` 唯一（非 draft） | 报错 |
+| 全部 `colors[].hex` 组合相同 | 报错（视为重复配色） |
+| 文件名与 `id` 不一致 | 警告 |
+| 同一 `sourceUrl` 或正文中的公众号链接 | 控制台列出已有 `id`（同源多篇如系列配色属正常，但新增前需确认不是重复收录） |
 
-```yaml
-usage:
-  nav: { background: 石青, text: 绢本 }
-  buttonPrimary: { background: 青绿, text: 绢本 }
-```
-
-构建后应存在 **`/palettes/{id}.json`**，引用配色时用该 URL，勿从 HTML 猜色。
-
-**模板文件：** [templates/palette.md](templates/palette.md)
+可选 frontmatter `sourceUrl` 标明原文；未填时从正文 `mp.weixin.qq.com/s/...` 提取。
 
 ---
 
 ## 四、首页「最近动态」
 
-首页方案 **E · 门户分块**：
+首页 **E · 门户分块**：
 
-- 上部：四个入口（笔记 / 文档 / 资源 / 配色），可显示数量
-- 下部：**最近动态**，从 notes + docs + resources 按日期降序取 N 条
+- 上部：**五入口**（笔记 / 文档 / 作品 / 资源 / 配色），显示数量
+- 下部：**最近动态**，从 notes + docs + projects + resources 按日期降序取 N 条（`SITE.homeFeedLimit`）
 
 | 列 | 来源 |
 |----|------|
 | 日期 | `pubDate` 或 `discoveredAt` |
-| 类型 | notes / docs / resources |
+| 类型 | 笔记 / 文档 / 作品 / 资源 |
 | 标题 | `title` |
-| 链接 | 笔记/文档 → 详情；资源 v1 → 列表页（或筛选锚点） |
+| 链接 | 笔记、文档、作品 → 详情；资源 → `/resources` |
 
 ---
 
@@ -207,13 +266,16 @@ usage:
 
 | 做什么 | 操作 |
 |--------|------|
-| 记 npm/服务 | `src/content/resources/<slug>.md`，复制 [templates/resource.md](templates/resource.md) |
-| 写笔记 | `src/content/notes/<slug>.mdx`，复制 [templates/note.mdx](templates/note.mdx) |
-| 写文档 | `src/content/docs/<slug>.mdx`，设 `toc`，复制 [templates/doc.mdx](templates/doc.mdx) |
-| 收配色 | `src/content/palettes/<slug>.md`，复制 [templates/palette.md](templates/palette.md) |
+| 记 npm/服务 | `src/content/resources/<slug>.md`，[templates/resource.md](templates/resource.md) |
+| 写笔记 | `src/content/notes/<slug>.mdx`，[templates/note.mdx](templates/note.mdx) |
+| 写文档 | `src/content/docs/<slug>.mdx`，[templates/doc.mdx](templates/doc.mdx) |
+| 上架作品 | `src/content/projects/<slug>.mdx`，[templates/project.mdx](templates/project.mdx) |
+| 收配色 | 先 `npm run check:palettes` 确认未重复 → `src/content/palettes/<slug>.md`（`id` = 文件名），[templates/palette.md](templates/palette.md) |
+| 改社交/站名 | `src/site.config.ts` + 必要时 `SiteFooter.astro` |
+| 改资源筛选枚举 | `src/lib/resources.ts` + `content.config.ts` + **本文第三节、第四节** |
 | 预览 | `npm run dev` |
-| 发布前 | `npm run build`（含 Pagefind 索引） |
-| 改站名/壳色/字体 | 布局与 `global.css` / Tailwind theme；见定案速查表 |
+| 发布前 | `npm run check:palettes` → `npm run build`（构建已含检查 + Pagefind） |
+| **改路由/集合/壳子** | **同步更新本文 + [AGENTS.md](AGENTS.md)** |
 
 ---
 
@@ -222,40 +284,39 @@ usage:
 | 项目 | 定案 |
 |------|------|
 | 框架 | Astro 6，静态站 |
-| 首页 | E 门户 + 最近动态 |
+| 首页 | E 门户（五入口）+ 最近动态 |
 | 站名 | 临时 **墨栈** |
-| 部署 | **待定**（Vercel / Cloudflare / GitHub Pages） |
+| 部署 | **Cloudflare Workers**，`https://mostack.fruitsdrink.workers.dev`（`astro.config.mjs` → `site`） |
 | CSS | Tailwind |
-| 默认主题 | **明亮**（无 localStorage 时不加 `dark`） |
+| 默认主题 | **明亮** |
 | 主题切换 | 明亮 / 暗黑 / 系统 |
-| resources / palettes | **仅列表**，v1 无详情页 |
-| docs TOC | frontmatter `toc: true \| false` |
-| 内容格式 | notes/docs 用 **MDX**；resources 可用 `.md` |
-| 搜索 | Pagefind（build 后生成） |
-| RSS | v1 **不上** |
-| 评论 | 无 |
-| 语言 | 中文为主，不做 i18n |
-| 字体 | Noto Sans SC 全文（含标题）；JetBrains Mono 代码；@fontsource 自托管 |
-| 字体 fallback | 系统中文栈；**禁止 Google Fonts** |
-| 壳 accent | 铜赭（**暂时**） |
-| 布局 | 宽工具站，非窄栏博客 |
-| Node | 资源/笔记侧重 Node 技术栈 |
+| resources | 列表 + 类型/分类筛选；**无单条详情** |
+| palettes | 仅列表 + JSON；v1 无 HTML 详情 |
+| projects | 列表 + 详情 |
+| docs TOC | frontmatter `toc` |
+| 内容格式 | notes / docs / projects → MDX；resources / palettes → `.md` |
+| 搜索 | Pagefind（build 后） |
+| RSS / 评论 | v1 无 |
+| 语言 | 中文为主 |
+| 字体 | Noto Sans SC + JetBrains Mono；@fontsource；禁止 Google Fonts |
+| 壳 accent | 铜赭（暂时） |
+| 布局 | 宽工具站；全站页脚含社交链接 |
 
 ---
 
 ## 七、给 Agent 的约定
 
-详见 [AGENTS.md](AGENTS.md)。
+详见 [AGENTS.md](AGENTS.md)。**改代码须同步改文档**（见本文开头）。
 
 ---
 
 ## 八、Session 关闭后速记
 
-1. 内容一律进 `src/content/<类型>/`
-2. 对照第三节 meta 填 frontmatter
-3. 资源/配色：**列表靠 meta**，详情页 v1 无
-4. 配色给 AI 画图：说 `palette id: xxx` → `/palettes/xxx.json`
-5. 壳色与 palettes **不要混**
+1. 内容进 `src/content/<类型>/`
+2. 对照第三节 meta
+3. 资源靠 meta + 筛选路由；配色给 AI 用 `/palettes/{id}.json`
+4. 壳色与 palettes 不要混
+5. **动 schema / 路由 / 导航 / 页脚 → 更新 HANDBOOK + AGENTS**
 
 ---
 
@@ -263,5 +324,5 @@ usage:
 
 | 文件 | 说明 |
 |------|------|
-| [AGENTS.md](AGENTS.md) | AI 协作约定 |
-| [templates/](templates/) | 四类内容复制模板 |
+| [AGENTS.md](AGENTS.md) | AI 协作约定（含文档同步） |
+| [templates/](templates/) | 五类内容复制模板 |
