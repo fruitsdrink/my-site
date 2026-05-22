@@ -1,0 +1,97 @@
+---
+import { formatDate } from '../lib/dates';
+import {
+  resourcesFilterUrl,
+  statusLabel,
+  type ResourceEntry,
+  type ResourceFilters,
+} from '../lib/resources';
+
+interface Props {
+  resources: ResourceEntry[];
+  /** 当前页已生效的筛选（用于高亮与叠加链接） */
+  filters: ResourceFilters;
+}
+
+const { resources, filters } = Astro.props;
+const { type: activeType, category: activeCategory } = filters;
+
+const linkClass =
+  'font-mono text-xs text-accent transition-colors hover:text-fg hover:underline';
+const mutedClass = 'font-mono text-xs text-muted';
+---
+
+{
+  resources.length === 0 ? (
+    <p class="text-muted">没有匹配的资源。</p>
+  ) : (
+    <div class="overflow-x-auto rounded border border-border bg-card">
+      <table class="w-full min-w-[560px] text-left text-sm">
+        <thead>
+          <tr class="border-b border-border text-xs text-muted">
+            <th class="px-4 py-3 font-medium">名称</th>
+            <th class="px-4 py-3 font-medium">类型</th>
+            <th class="px-4 py-3 font-medium">分类</th>
+            <th class="whitespace-nowrap px-4 py-3 font-medium">状态</th>
+            <th class="whitespace-nowrap px-4 py-3 font-medium">日期</th>
+          </tr>
+        </thead>
+        <tbody>
+          {resources.map((entry) => (
+            <tr class="border-b border-border last:border-b-0 hover:bg-bg/50">
+              <td class="px-4 py-3">
+                <a
+                  href={entry.data.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-medium text-fg hover:text-accent"
+                >
+                  {entry.data.title}
+                </a>
+                <p class="mt-0.5 text-xs text-muted">{entry.data.description}</p>
+              </td>
+              <td class="whitespace-nowrap px-4 py-3">
+                {activeType === entry.data.type ? (
+                  <span class={mutedClass}>{entry.data.type}</span>
+                ) : (
+                  <a
+                    href={resourcesFilterUrl({
+                      type: entry.data.type,
+                      category: activeCategory,
+                    })}
+                    class={linkClass}
+                  >
+                    {entry.data.type}
+                  </a>
+                )}
+              </td>
+              <td class="whitespace-nowrap px-4 py-3">
+                {activeCategory === entry.data.category ? (
+                  <span class={mutedClass}>{entry.data.category}</span>
+                ) : (
+                  <a
+                    href={resourcesFilterUrl({
+                      type: activeType,
+                      category: entry.data.category,
+                    })}
+                    class={linkClass}
+                  >
+                    {entry.data.category}
+                  </a>
+                )}
+              </td>
+              <td class="whitespace-nowrap px-4 py-3">
+                <span class="inline-block whitespace-nowrap rounded border border-border px-2 py-0.5 text-xs text-accent">
+                  {statusLabel[entry.data.status] ?? entry.data.status}
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-muted">
+                {formatDate(entry.data.discoveredAt)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

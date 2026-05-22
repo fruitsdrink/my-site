@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import ResourcesFilterBar from '../../../../../components/ResourcesFilterBar.astro';
+import ResourcesTable from '../../../../../components/ResourcesTable.astro';
+import {
+  filterResources,
+  getResourceTypeCategoryPairs,
+  getSortedResources,
+  isResourceCategory,
+  isResourceType,
+} from '../../../../../lib/resources';
+
+export async function getStaticPaths() {
+  const pairs = await getResourceTypeCategoryPairs();
+  return pairs.map(({ type, category }) => ({
+    params: { type, category },
+  }));
+}
+
+const { type, category } = Astro.params;
+
+if (!type || !category || !isResourceType(type) || !isResourceCategory(category)) {
+  return Astro.redirect('/resources');
+}
+
+const filters = { type, category };
+const resources = filterResources(await getSortedResources(), filters);
+const pageTitle = `资源 · ${type} · ${category}`;
+---
+
+<BaseLayout title={pageTitle}>
+  <header class="mb-8">
+    <h1 class="font-display text-2xl font-bold">资源</h1>
+    <p class="mt-2 text-sm text-muted">
+      类型 <span class="font-mono text-accent">{type}</span>
+      {' · '}
+      分类 <span class="font-mono text-accent">{category}</span>
+    </p>
+  </header>
+
+  <ResourcesFilterBar filters={filters} count={resources.length} />
+  <ResourcesTable resources={resources} filters={filters} />
+</BaseLayout>
