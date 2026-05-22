@@ -62,6 +62,9 @@ src/
     palettes/[id].json.ts   # Agent 用 JSON，建议保留
   styles/global.css
 public/fonts/
+public/favicon.svg          # 主图标（随系统明暗）
+public/favicon.ico          # 明亮模式回退
+public/favicon-dark.ico     # 暗黑模式回退
 docs/                       # 本手册与模板
 ```
 

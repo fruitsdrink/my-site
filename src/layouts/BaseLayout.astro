@@ -22,6 +22,9 @@ const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/favicon-dark.ico" sizes="any" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <title>{pageTitle}</title>
     <slot name="head" />
   </head>
