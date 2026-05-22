@@ -1,0 +1,61 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { formatDate } from '../lib/dates';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  tags?: string[];
+  toc: boolean;
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { title, description, pubDate, updatedDate, tags = [], toc, headings } = Astro.props;
+const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+<BaseLayout title={title} description={description}>
+  <article class:list={[toc && tocHeadings.length > 0 && 'lg:grid lg:grid-cols-[1fr_220px] lg:gap-10']}>
+    <div>
+      <header class="mb-8 border-b border-border pb-6">
+        <p class="mb-2 text-sm text-muted">
+          <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+          {updatedDate && (
+            <span> · 更新 <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time></span>
+          )}
+        </p>
+        <h1 class="font-display text-3xl font-bold text-fg">{title}</h1>
+        {tags.length > 0 && (
+          <ul class="mt-3 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <li>
+                <span class="rounded border border-border px-2 py-0.5 text-xs text-muted">{tag}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </header>
+      <div class="prose-content">
+        <slot />
+      </div>
+    </div>
+    {toc && tocHeadings.length > 0 && (
+      <aside class="hidden lg:block">
+        <nav class="sticky top-8 rounded border border-border bg-card p-4 text-sm" aria-label="目录">
+          <p class="mb-3 font-medium text-muted">目录</p>
+          <ul class="space-y-2">
+            {tocHeadings.map((h) => (
+              <li class:list={[h.depth === 3 && 'pl-3']}>
+                <a href={`#${h.slug}`} class="text-muted transition-colors hover:text-accent">
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
+    )}
+  </article>
+</BaseLayout>

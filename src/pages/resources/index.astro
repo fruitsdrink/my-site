@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/dates';
+import { getPublishedResources } from '../../lib/collections';
+
+const resources = (await getPublishedResources())
+  .filter((e) => e.data.status !== 'deprecated')
+  .sort((a, b) => b.data.discoveredAt.getTime() - a.data.discoveredAt.getTime());
+
+const statusLabel: Record<string, string> = {
+  bookmarked: '收藏',
+  tried: '试过',
+  using: '在用',
+};
+---
+
+<BaseLayout title="资源">
+  <header class="mb-8">
+    <h1 class="font-display text-2xl font-bold">资源</h1>
+    <p class="mt-2 text-sm text-muted">开发或学习中发现的服务、库与工具（v1 仅列表）</p>
+  </header>
+
+  {resources.length === 0 ? (
+    <p class="text-muted">暂无资源。</p>
+  ) : (
+    <div class="overflow-x-auto rounded border border-border bg-card">
+      <table class="w-full min-w-[640px] text-left text-sm">
+        <thead>
+          <tr class="border-b border-border text-xs text-muted">
+            <th class="px-4 py-3 font-medium">名称</th>
+            <th class="px-4 py-3 font-medium">类型</th>
+            <th class="px-4 py-3 font-medium">分类</th>
+            <th class="px-4 py-3 font-medium">状态</th>
+            <th class="px-4 py-3 font-medium">发现于</th>
+            <th class="px-4 py-3 font-medium">日期</th>
+          </tr>
+        </thead>
+        <tbody>
+          {resources.map((entry) => (
+            <tr class="border-b border-border last:border-b-0 hover:bg-bg/50">
+              <td class="px-4 py-3">
+                <a
+                  href={entry.data.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-medium text-fg hover:text-accent"
+                >
+                  {entry.data.title}
+                </a>
+                <p class="mt-0.5 text-xs text-muted">{entry.data.description}</p>
+              </td>
+              <td class="px-4 py-3 font-mono text-xs text-muted">{entry.data.type}</td>
+              <td class="px-4 py-3 font-mono text-xs text-muted">{entry.data.category}</td>
+              <td class="px-4 py-3">
+                <span class="rounded border border-border px-2 py-0.5 text-xs text-accent">
+                  {statusLabel[entry.data.status] ?? entry.data.status}
+                </span>
+              </td>
+              <td class="max-w-[12rem] truncate px-4 py-3 text-xs text-muted">
+                {entry.data.discoveredFrom ?? '—'}
+              </td>
+              <td class="px-4 py-3 font-mono text-xs text-muted">
+                {formatDate(entry.data.discoveredAt)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</BaseLayout>

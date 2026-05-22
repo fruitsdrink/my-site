@@ -1,0 +1,32 @@
+---
+title: Auth 选型备忘
+description: Clerk、Better Auth、Supabase Auth 的粗对比，面向 Next.js App Router。
+pubDate: 2025-03-08
+toc: true
+tags: [auth, nextjs]
+draft: false
+sidebar: Node 全栈
+---
+
+## 背景
+
+个人项目需要登录，不想自建 session 太久，先列候选。
+
+## Clerk
+
+- 集成快，中间件成熟
+- 托管用户，数据在第三方
+
+## Supabase Auth
+
+- 和数据库一家，RLS 顺手
+- UI 组件要自己多调一点
+
+## Better Auth
+
+- 自托管友好，适合要控数据
+- 相对新，社区例子少一些
+
+## 暂定
+
+Side project 可 Clerk；全 Supabase 栈用 Supabase Auth。

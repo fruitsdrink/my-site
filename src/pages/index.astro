@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../site.config';
+import { getHomeFeed, getKindLabel } from '../lib/feed';
+import {
+  getPublishedDocs,
+  getPublishedNotes,
+  getPublishedPalettes,
+  getPublishedResources,
+} from '../lib/collections';
+
+const [feed, notes, docs, resources, palettes] = await Promise.all([
+  getHomeFeed(SITE.homeFeedLimit),
+  getPublishedNotes(),
+  getPublishedDocs(),
+  getPublishedResources(),
+  getPublishedPalettes(),
+]);
+
+const portals = [
+  { href: '/notes', label: '笔记', count: notes.length, num: '01' },
+  { href: '/docs', label: '文档', count: docs.length, num: '02' },
+  { href: '/resources', label: '资源', count: resources.length, num: '03' },
+  { href: '/palettes', label: '配色', count: palettes.length, num: '04' },
+];
+---
+
+<BaseLayout>
+  <section class="mb-10 max-w-2xl">
+    <h1 class="font-display text-2xl font-bold text-fg">Node 开发与学习记录</h1>
+    <p class="mt-2 text-muted">{SITE.description}</p>
+  </section>
+
+  <nav class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="内容入口">
+    {portals.map((p) => (
+      <a
+        href={p.href}
+        class="block rounded border border-border bg-card px-5 py-8 text-center transition-colors hover:border-accent"
+      >
+        <span class="font-mono text-xs text-highlight">{p.num}</span>
+        <strong class="font-display mt-2 block text-xl text-accent">{p.label}</strong>
+        <span class="mt-1 block text-sm text-muted">{p.count} 条</span>
+      </a>
+    ))}
+  </nav>
+
+  <section>
+    <h2 class="mb-4 border-b border-border pb-2 font-display text-lg font-bold">
+      最近动态
+      <span class="ml-2 font-sans text-xs font-normal text-muted">notes · docs · resources</span>
+    </h2>
+    <div class="rounded border border-border bg-card">
+      {feed.length === 0 ? (
+        <p class="p-6 text-muted">暂无内容，在 src/content/ 下添加笔记、文档或资源。</p>
+      ) : (
+        <ul>
+          {feed.map((item) => (
+            <li class="grid grid-cols-[5rem_4rem_1fr_auto] items-baseline gap-4 border-b border-border px-4 py-3 last:border-b-0 sm:px-5">
+              <time class="font-mono text-xs text-muted">{item.dateLabel}</time>
+              <span class="text-xs text-accent">{getKindLabel(item.kind)}</span>
+              <a href={item.href} class="text-fg transition-colors hover:text-accent">
+                {item.title}
+              </a>
+              {item.badge && (
+                <span class="rounded border border-border px-2 py-0.5 text-xs text-muted">
+                  {item.badge}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+</BaseLayout>

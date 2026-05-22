@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/dates';
+import { getPublishedPalettes } from '../../lib/collections';
+
+const palettes = (await getPublishedPalettes()).sort(
+  (a, b) => b.data.discoveredAt.getTime() - a.data.discoveredAt.getTime(),
+);
+---
+
+<BaseLayout title="配色">
+  <header class="mb-8">
+    <h1 class="font-display text-2xl font-bold">配色</h1>
+    <p class="mt-2 text-sm text-muted">
+      收藏的配色方案；Agent 引用请用 <code class="font-mono text-xs">/palettes/&#123;id&#125;.json</code>
+    </p>
+  </header>
+
+  {palettes.length === 0 ? (
+    <p class="text-muted">暂无配色。</p>
+  ) : (
+    <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {palettes.map((entry) => (
+        <li class="rounded border border-border bg-card p-4">
+          <div class="mb-3 flex h-8 overflow-hidden rounded border border-border">
+            {entry.data.colors.slice(0, 8).map((c) => (
+              <span class="min-w-0 flex-1" style={`background:${c.hex}`} title={`${c.name} ${c.hex}`} />
+            ))}
+          </div>
+          <h2 class="font-display font-bold text-fg">{entry.data.title}</h2>
+          <p class="mt-1 text-sm text-muted">{entry.data.description}</p>
+          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted">
+            <span>{entry.data.style}</span>
+            <span>·</span>
+            <time>{formatDate(entry.data.discoveredAt)}</time>
+          </div>
+          <a
+            href={`/palettes/${entry.data.id}.json`}
+            class="mt-3 inline-block font-mono text-xs text-accent hover:underline"
+          >
+            /palettes/{entry.data.id}.json
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+</BaseLayout>

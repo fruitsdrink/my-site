@@ -1,0 +1,41 @@
+---
+/** 明亮 / 暗黑 / 系统 三态切换 */
+---
+
+<div class="theme-toggle flex items-center gap-0.5 rounded border border-border bg-card p-0.5 text-xs" role="group" aria-label="主题">
+  <button type="button" data-theme="light" class="theme-btn rounded px-2 py-1 text-muted transition-colors hover:text-fg">明亮</button>
+  <button type="button" data-theme="dark" class="theme-btn rounded px-2 py-1 text-muted transition-colors hover:text-fg">暗黑</button>
+  <button type="button" data-theme="system" class="theme-btn rounded px-2 py-1 text-muted transition-colors hover:text-fg">系统</button>
+</div>
+
+<script>
+  function resolveDark(mode: string): boolean {
+    if (mode === 'dark') return true;
+    if (mode === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  function applyTheme(mode: string) {
+    localStorage.setItem('theme', mode);
+    document.documentElement.classList.toggle('dark', resolveDark(mode));
+    document.querySelectorAll<HTMLButtonElement>('.theme-btn').forEach((btn) => {
+      const active = btn.dataset.theme === mode;
+      btn.classList.toggle('bg-accent', active);
+      btn.classList.toggle('text-white', active);
+      btn.classList.toggle('text-muted', !active);
+    });
+  }
+
+  const stored = localStorage.getItem('theme') ?? 'light';
+  applyTheme(stored);
+
+  document.querySelectorAll<HTMLButtonElement>('.theme-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.theme) applyTheme(btn.dataset.theme);
+    });
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (localStorage.getItem('theme') === 'system') applyTheme('system');
+  });
+</script>

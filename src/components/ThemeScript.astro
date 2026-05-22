@@ -1,0 +1,10 @@
+<!-- 首屏防闪：默认明亮，支持 light / dark / system -->
+<script is:inline>
+  (function () {
+    const stored = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const resolved =
+      stored === 'dark' ? true : stored === 'light' ? false : stored === 'system' ? systemDark : false;
+    document.documentElement.classList.toggle('dark', resolved);
+  })();
+</script>

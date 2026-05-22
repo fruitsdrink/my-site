@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from 'astro:content';
+import DocLayout from '../../layouts/DocLayout.astro';
+import { isPublished } from '../../lib/collections';
+
+export async function getStaticPaths() {
+  const entries = (await getCollection('docs')).filter(isPublished);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const { title, description, pubDate, updatedDate, tags, toc } = entry.data;
+---
+
+<DocLayout
+  title={title}
+  description={description}
+  pubDate={pubDate}
+  updatedDate={updatedDate}
+  tags={tags}
+  toc={toc}
+  headings={headings}
+>
+  <Content />
+</DocLayout>

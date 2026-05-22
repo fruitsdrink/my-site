@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const isDev = import.meta.env.DEV;
+---
+
+<BaseLayout title="搜索">
+  <Fragment slot="head">
+    {!isDev && <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />}
+  </Fragment>
+
+  <h1 class="font-display mb-4 text-2xl font-bold">搜索</h1>
+  {isDev && (
+    <p class="mb-6 rounded border border-border bg-card px-4 py-3 text-sm text-muted">
+      开发模式下 Pagefind 索引未生成。请运行 <code class="font-mono text-xs">npm run build && npm run preview</code> 后使用搜索。
+    </p>
+  )}
+  <div id="pagefind-search" class="min-h-[200px]"></div>
+</BaseLayout>
+
+{!isDev && (
+  <>
+    <script is:inline src="/pagefind/pagefind-ui.js"></script>
+    <script is:inline>
+      new PagefindUI({
+        element: '#pagefind-search',
+        showImages: false,
+        translations: {
+          placeholder: '搜索笔记、文档、资源…',
+          clear_search: '清除',
+          load_more: '加载更多',
+          search_label: '搜索本站',
+          zero_results: '没有找到相关结果',
+          many_results: '找到 [count] 条结果',
+          one_result: '找到 1 条结果',
+        },
+      });
+    </script>
+  </>
+)}
