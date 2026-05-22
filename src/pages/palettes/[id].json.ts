@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 }
 
 export const GET: APIRoute = ({ props, site }) => {
-  const origin = site?.toString().replace(/\/$/, '') ?? 'https://example.com';
+  const origin = site?.toString().replace(/\/$/, '') ?? 'https://mostack.fruitsdrink.workers.dev';
   const body = buildPaletteJson(props.entry, origin);
   return new Response(JSON.stringify(body, null, 2), {
     headers: {
