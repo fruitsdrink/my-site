@@ -1,0 +1,63 @@
+---
+title: chronovia-desk
+description: 桌面端专注计时器：无边框透明小窗、系统托盘、多主题与明暗模式。
+github: https://github.com/fruitsdrink/chronovia-desk
+cover: https://raw.githubusercontent.com/fruitsdrink/chronovia-desk/main/design/exports/chronovia-default-cn.png
+coverAlt: chronovia-desk 默认主题 · 浅色
+downloadUrl: https://github.com/fruitsdrink/chronovia-desk/releases/latest
+stack:
+  - Tauri 2
+  - React
+  - TypeScript
+  - Tailwind CSS
+  - Rust
+  - Bun
+status: active
+pubDate: 2026-05-22
+tags:
+  - 桌面应用
+  - 计时器
+  - 开源
+draft: false
+---
+
+基于 [Tauri 2](https://v2.tauri.app/) + React + TypeScript 的桌面专注计时器。窗口无边框、可透明，可常驻系统托盘；支持默认主题与翻页时钟主题，明暗模式与窗口位置会持久化。
+
+## 功能
+
+- **计时器**：开始 / 暂停 / 继续 / 重置；完成后播放提示音
+- **主题**：默认主题、翻页时钟；托盘菜单切换，选择持久化
+- **外观**：明暗模式与窗口位置记忆
+- **窗口**：无边框、可透明；关闭后隐藏到后台；可选置顶
+- **托盘**：系统托盘菜单；macOS 下可隐藏 Dock / 任务栏图标
+
+## 主题预览
+
+截图来自仓库设计稿导出，与当前实现一致。
+
+### 默认主题
+
+| 浅色 | 深色 |
+| --- | --- |
+| ![默认主题 · 浅色](https://raw.githubusercontent.com/fruitsdrink/chronovia-desk/main/design/exports/chronovia-default-cn.png) | ![默认主题 · 深色](https://raw.githubusercontent.com/fruitsdrink/chronovia-desk/main/design/exports/chronovia-default-cn-dark.png) |
+
+### 翻页时钟
+
+| 浅色 | 深色 |
+| --- | --- |
+| ![翻页时钟 · 浅色](https://raw.githubusercontent.com/fruitsdrink/chronovia-desk/main/design/exports/chronovia-flip-clock-cn.png) | ![翻页时钟 · 深色](https://raw.githubusercontent.com/fruitsdrink/chronovia-desk/main/design/exports/chronovia-flip-clock-cn-dark.png) |
+
+## 下载
+
+预编译安装包见 [GitHub Releases](https://github.com/fruitsdrink/chronovia-desk/releases/latest)。当前提供 macOS Apple Silicon (`.dmg`)：下载后拖入「应用程序」即可。若遇 Gatekeeper 拦截，可在「系统设置 → 隐私与安全性」中允许打开。
+
+## 本地开发
+
+需要 [Bun](https://bun.sh/)、[Rust](https://www.rust-lang.org/tools/install) 及各平台 [Tauri 前置依赖](https://v2.tauri.app/start/prerequisites/)。
+
+```bash
+bun install
+bun tauri dev
+```
+
+完整说明见仓库 [README](https://github.com/fruitsdrink/chronovia-desk#readme)。

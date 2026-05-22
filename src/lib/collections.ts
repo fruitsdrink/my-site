@@ -17,6 +17,10 @@ export async function getPublishedResources() {
   return (await getCollection('resources')).filter(isPublished);
 }
 
+export async function getPublishedProjects() {
+  return (await getCollection('projects')).filter(isPublished);
+}
+
 export async function getPublishedPalettes() {
   return (await getCollection('palettes')).filter(isPublished);
 }

@@ -6,13 +6,15 @@ import {
   getPublishedDocs,
   getPublishedNotes,
   getPublishedPalettes,
+  getPublishedProjects,
   getPublishedResources,
 } from '../lib/collections';
 
-const [feed, notes, docs, resources, palettes] = await Promise.all([
+const [feed, notes, docs, projects, resources, palettes] = await Promise.all([
   getHomeFeed(SITE.homeFeedLimit),
   getPublishedNotes(),
   getPublishedDocs(),
+  getPublishedProjects(),
   getPublishedResources(),
   getPublishedPalettes(),
 ]);
@@ -20,8 +22,9 @@ const [feed, notes, docs, resources, palettes] = await Promise.all([
 const portals = [
   { href: '/notes', label: '笔记', count: notes.length, num: '01' },
   { href: '/docs', label: '文档', count: docs.length, num: '02' },
-  { href: '/resources', label: '资源', count: resources.length, num: '03' },
-  { href: '/palettes', label: '配色', count: palettes.length, num: '04' },
+  { href: '/projects', label: '作品', count: projects.length, num: '03' },
+  { href: '/resources', label: '资源', count: resources.length, num: '04' },
+  { href: '/palettes', label: '配色', count: palettes.length, num: '05' },
 ];
 ---
 
@@ -31,7 +34,7 @@ const portals = [
     <p class="mt-2 text-muted">{SITE.description}</p>
   </section>
 
-  <nav class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="内容入口">
+  <nav class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" aria-label="内容入口">
     {portals.map((p) => (
       <a
         href={p.href}
@@ -47,7 +50,7 @@ const portals = [
   <section>
     <h2 class="mb-4 border-b border-border pb-2 font-display text-lg font-bold">
       最近动态
-      <span class="ml-2 font-sans text-xs font-normal text-muted">notes · docs · resources</span>
+      <span class="ml-2 font-sans text-xs font-normal text-muted">notes · docs · projects · resources</span>
     </h2>
     <div class="rounded border border-border bg-card">
       {feed.length === 0 ? (

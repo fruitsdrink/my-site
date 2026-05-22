@@ -86,6 +86,25 @@ const resources = defineCollection({
   }),
 });
 
+const projects = defineCollection({
+  loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    github: z.string().url(),
+    /** 列表卡片封面图 */
+    cover: z.string().url(),
+    coverAlt: z.string().optional(),
+    downloadUrl: z.string().url().optional(),
+    stack: z.array(z.string()).default([]),
+    status: z.enum(['active', 'maintenance', 'archived']).default('active'),
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+});
+
 const palettes = defineCollection({
   loader: glob({ base: './src/content/palettes', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
@@ -105,4 +124,4 @@ const palettes = defineCollection({
   }),
 });
 
-export const collections = { notes, docs, resources, palettes };
+export const collections = { notes, docs, resources, projects, palettes };

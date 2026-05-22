@@ -128,3 +128,29 @@ body {
   color: var(--site-muted);
   margin: 1.25em 0;
 }
+
+.prose-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid var(--site-border);
+}
+
+.prose-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25em 0;
+  font-size: 0.9rem;
+}
+
+.prose-content th,
+.prose-content td {
+  border: 1px solid var(--site-border);
+  padding: 0.5rem;
+  vertical-align: top;
+}
+
+.prose-content th {
+  background: var(--site-card);
+  text-align: left;
+}

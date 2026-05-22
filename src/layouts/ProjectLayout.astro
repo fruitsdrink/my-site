@@ -1,0 +1,108 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { formatDate } from '../lib/dates';
+
+interface Props {
+  title: string;
+  description: string;
+  github: string;
+  downloadUrl?: string;
+  stack: string[];
+  status: 'active' | 'maintenance' | 'archived';
+  pubDate: Date;
+  updatedDate?: Date;
+  tags?: string[];
+}
+
+const statusLabel: Record<Props['status'], string> = {
+  active: '维护中',
+  maintenance: '维护模式',
+  archived: '已归档',
+};
+
+const {
+  title,
+  description,
+  github,
+  downloadUrl,
+  stack,
+  status,
+  pubDate,
+  updatedDate,
+  tags = [],
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article>
+    <header class="mb-8 border-b border-border pb-6">
+      <p class="mb-2 text-sm text-muted">
+        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        {updatedDate && (
+          <span>
+            {' '}
+            · 更新 <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>
+          </span>
+        )}
+        <span class="mx-2">·</span>
+        <span>{statusLabel[status]}</span>
+      </p>
+      <h1 class="font-display text-3xl font-bold text-fg">{title}</h1>
+      <p class="mt-2 text-muted">{description}</p>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a
+          href={github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="rounded border border-border bg-card px-3 py-1.5 text-sm text-accent transition-colors hover:border-accent"
+        >
+          GitHub
+        </a>
+        {
+          downloadUrl && (
+            <a
+              href={downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rounded border border-accent bg-accent px-3 py-1.5 text-sm text-card transition-colors hover:opacity-90"
+            >
+              下载
+            </a>
+          )
+        }
+      </div>
+
+      {
+        stack.length > 0 && (
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {stack.map((item) => (
+              <li>
+                <span class="rounded border border-border px-2 py-0.5 font-mono text-xs text-muted">
+                  {item}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        tags.length > 0 && (
+          <ul class="mt-3 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <li>
+                <span class="rounded border border-border px-2 py-0.5 text-xs text-accent">
+                  {tag}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+    <div class="prose-content">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>

@@ -1,4 +1,5 @@
 ---
+import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import ThemeScript from '../components/ThemeScript.astro';
 import { SITE } from '../site.config';
@@ -28,10 +29,11 @@ const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
     <title>{pageTitle}</title>
     <slot name="head" />
   </head>
-  <body class="bg-bg text-fg antialiased">
+  <body class="flex min-h-screen flex-col bg-bg text-fg antialiased">
     <SiteHeader />
-    <main class="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8" data-pagefind-body>
+    <main class="mx-auto w-full max-w-[1600px] flex-1 px-4 py-8 sm:px-6 lg:px-8" data-pagefind-body>
       <slot />
     </main>
+    <SiteFooter />
   </body>
 </html>
