@@ -114,8 +114,14 @@ const palettes = defineCollection({
     style: z.enum(['light', 'dark', 'mixed']),
     format: z.enum(['css-variables', 'tailwind', 'other']),
     discoveredFrom: z.string().optional(),
-    /** 原文链接，便于收录去重（与 check:palettes 同源检测） */
-    sourceUrl: z.string().url().optional(),
+    /** 数据来源 URL（署名与免责，必填） */
+    sourceUrl: z.string().url(),
+    /** 来源标题，用于页面展示；缺省可用 discoveredFrom */
+    sourceTitle: z.string().optional(),
+    /** 原文作者或发布者（如公众号名） */
+    sourceAuthor: z.string().optional(),
+    /** 作者主页/公众号链接；缺省则仅展示作者名 */
+    sourceAuthorUrl: z.string().url().optional(),
     discoveredAt: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     searchKeywords: z.array(z.string()).default([]),

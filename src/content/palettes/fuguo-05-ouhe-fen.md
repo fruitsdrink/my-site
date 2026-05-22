@@ -5,6 +5,10 @@ description: 米杏到蜜桃再到玫红，甜糯复古海报感；第 5 组。
 style: mixed
 format: css-variables
 discoveredFrom: 过慢慢 · 复古渐变｜配色分享
+sourceUrl: https://mp.weixin.qq.com/s/C_k-cAsPiH9DgzqpyGdGlg
+sourceTitle: 复古渐变｜配色分享
+sourceAuthor: 过慢慢
+sourceAuthorUrl: https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzYzMzc0NTg1OA==
 discoveredAt: 2026-05-22
 tags: [复古, 渐变, 配色分享, 粉彩]
 searchKeywords: [藕荷, 蜜桃, 玫红, 杏]
@@ -41,5 +45,3 @@ usage:
     background: 玫红
     text: 米杏
 ---
-
-参考来源：https://mp.weixin.qq.com/s/C_k-cAsPiH9DgzqpyGdGlg

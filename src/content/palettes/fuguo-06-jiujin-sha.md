@@ -5,6 +5,10 @@ description: 粉金、赭石与橄榄绿叠深褐，复古印刷海报色；第 
 style: mixed
 format: css-variables
 discoveredFrom: 过慢慢 · 复古渐变｜配色分享
+sourceUrl: https://mp.weixin.qq.com/s/C_k-cAsPiH9DgzqpyGdGlg
+sourceTitle: 复古渐变｜配色分享
+sourceAuthor: 过慢慢
+sourceAuthorUrl: https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzYzMzc0NTg1OA==
 discoveredAt: 2026-05-22
 tags: [复古, 渐变, 配色分享, 暖色]
 searchKeywords: [旧金, 橄榄, 赭石, 砂]
@@ -41,5 +45,3 @@ usage:
     background: 橄榄
     text: 粉金
 ---
-
-参考来源：https://mp.weixin.qq.com/s/C_k-cAsPiH9DgzqpyGdGlg

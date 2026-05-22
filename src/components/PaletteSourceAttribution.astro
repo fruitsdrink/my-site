@@ -1,0 +1,46 @@
+---
+interface Props {
+  sourceUrl: string;
+  sourceTitle?: string;
+  discoveredFrom?: string;
+  sourceAuthor?: string;
+  sourceAuthorUrl?: string;
+}
+
+const { sourceUrl, sourceTitle, discoveredFrom, sourceAuthor, sourceAuthorUrl } = Astro.props;
+
+const linkLabel = sourceTitle ?? discoveredFrom ?? '原文链接';
+---
+
+<p class="mt-2 text-xs text-muted">
+  来源：
+  {
+    sourceAuthor && (
+      <>
+        {
+          sourceAuthorUrl ? (
+            <a
+              href={sourceAuthorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-accent hover:underline"
+            >
+              {sourceAuthor}
+            </a>
+          ) : (
+            <span class="text-fg">{sourceAuthor}</span>
+          )
+        }
+        <span aria-hidden="true"> · </span>
+      </>
+    )
+  }
+  <a
+    href={sourceUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="text-accent hover:underline"
+  >
+    {linkLabel}
+  </a>
+</p>

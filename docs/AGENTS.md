@@ -65,7 +65,7 @@ Meta 定义见 [HANDBOOK.md](HANDBOOK.md)。
 
 - **新增 palette 前** 运行 `npm run check:palettes`；构建会自动执行
 - 禁止重复：`id`、标题、相同 `colors` 色值组合
-- `id` 与文件名一致；可选 `sourceUrl` 或正文公众号链接用于同源核对
+- `id` 与文件名一致；**必填 `sourceUrl`**；建议填 `sourceTitle`；有作者则填 `sourceAuthor`（可选 `sourceAuthorUrl`）
 - 若检查列出同一来源下已有 `id`，先确认不是重复收录再添加
 
 ## 资源筛选（实现参考）

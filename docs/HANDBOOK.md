@@ -221,6 +221,10 @@ description: (必填)
 style: light | dark | mixed
 format: css-variables | tailwind | other
 discoveredFrom: 可选
+sourceUrl: (必填) 原文/作品链接，用于署名与免责
+sourceTitle: 可选 来源标题（链接文字；缺省用 discoveredFrom）
+sourceAuthor: 可选 作者/公众号名（列表展示为「作者 · 标题」）
+sourceAuthorUrl: 可选 作者主页；无则作者仅文本
 discoveredAt: (必填)
 tags: [] 可选
 searchKeywords: [] 可选
@@ -242,7 +246,7 @@ usage: 可选
 | 文件名与 `id` 不一致 | 警告 |
 | 同一 `sourceUrl` 或正文中的公众号链接 | 控制台列出已有 `id`（同源多篇如系列配色属正常，但新增前需确认不是重复收录） |
 
-可选 frontmatter `sourceUrl` 标明原文；未填时从正文 `mp.weixin.qq.com/s/...` 提取。
+`sourceUrl` **必填**；`sourceTitle` 建议填写便于展示。检查脚本会拒绝无来源的条目；正文中的公众号链接仍可作为同源去重辅助。
 
 ---
 

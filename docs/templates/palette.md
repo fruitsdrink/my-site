@@ -5,7 +5,10 @@ description: ""
 style: mixed
 format: css-variables
 discoveredFrom: ""
-# sourceUrl: ""  # 可选，原文 URL；与正文中的链接二选一，用于去重
+sourceUrl: ""  # 必填：原文/作品数据来源 URL（署名与免责）
+sourceTitle: ""  # 可选：来源标题（链接文字）
+sourceAuthor: ""  # 可选：作者/公众号名；有则与链接一并展示
+# sourceAuthorUrl: ""  # 可选：作者公众号主页（mp.weixin.qq.com/mp/profile_ext?...）
 discoveredAt: 2025-05-22
 tags: []
 searchKeywords: []
@@ -30,6 +33,6 @@ colors:
 #   buttonPrimary: { background: 强调, text: 背景 }
 ---
 
-**收录前必做：** `npm run check:palettes`（构建也会自动跑）。勿重复 `id`、标题或相同色值组合；同一篇文章已收录时控制台会列出已有 `id`。
+**收录前必做：** `npm run check:palettes`（构建也会自动跑）。勿重复 `id`、标题或相同色值组合；**必须填写 `sourceUrl`**；同一篇文章已收录时控制台会列出已有 `id`。
 
 <!-- 可选：为什么收、适合什么类型的页面。 -->

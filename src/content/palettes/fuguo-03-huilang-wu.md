@@ -5,6 +5,10 @@ description: 冰蓝与天青叠灰紫，清冷雾感；第 3 组。
 style: light
 format: css-variables
 discoveredFrom: 过慢慢 · 复古渐变｜配色分享
+sourceUrl: https://mp.weixin.qq.com/s/C_k-cAsPiH9DgzqpyGdGlg
+sourceTitle: 复古渐变｜配色分享
+sourceAuthor: 过慢慢
+sourceAuthorUrl: https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzYzMzc0NTg1OA==
 discoveredAt: 2026-05-22
 tags: [复古, 渐变, 配色分享, 冷色]
 searchKeywords: [灰蓝, 天青, 雾, 冰蓝]
@@ -41,5 +45,3 @@ usage:
     background: 湖水青
     text: 深灰紫
 ---
-
-参考来源：https://mp.weixin.qq.com/s/C_k-cAsPiH9DgzqpyGdGlg

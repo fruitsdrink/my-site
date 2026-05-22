@@ -95,6 +95,14 @@ export function validatePalettes(entries) {
       continue;
     }
 
+    const sourceUrl =
+      typeof data.sourceUrl === 'string' ? data.sourceUrl.trim() : '';
+    if (!sourceUrl) {
+      errors.push(`${file}: 缺少 sourceUrl（数据来源，用于署名）`);
+    } else if (!/^https?:\/\//i.test(sourceUrl)) {
+      errors.push(`${file}: sourceUrl 须为 http(s) 链接`);
+    }
+
     if (slug !== id) {
       warnings.push(`${file}: 文件名「${slug}」与 id「${id}」不一致，建议保持一致`);
     }
@@ -125,11 +133,11 @@ export function validatePalettes(entries) {
       }
     }
 
-    const sourceUrl = extractSourceUrl(body, data);
-    if (sourceUrl) {
-      const list = sourceToIds.get(sourceUrl) ?? [];
+    const sourceKey = sourceUrl || extractSourceUrl(body, data);
+    if (sourceKey) {
+      const list = sourceToIds.get(sourceKey) ?? [];
       list.push(id);
-      sourceToIds.set(sourceUrl, list);
+      sourceToIds.set(sourceKey, list);
     }
   }
 
