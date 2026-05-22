@@ -1,0 +1,103 @@
+---
+title: ProseMirror 入门（下）：Markdown 与 remark
+description: prosemirror-markdown、remark/unified、Milkdown，以及 Web Typora 还要补什么。
+pubDate: 2026-05-21
+tags: [web-typora, prosemirror, markdown, remark, milkdown, tutorial]
+draft: false
+series: web-typora
+seriesOrder: 4
+---
+
+> **前置：** [ProseMirror 入门（上）](/notes/prosemirror-basics) — 已能讲清 Schema、Node、`dispatchTransaction`。
+
+## 为什么要单独讲 Markdown
+
+`playground/pm` 最小示例里，真相源是 **Node 树**（`doc.toJSON()`）。用户磁盘上的 `.md` 还要经过 **解析 → 编辑 → 序列化**。常见两条路：
+
+- **prosemirror-markdown**（官方，偏 CommonMark）
+- **remark / unified**（生态大，GFM 成熟；Milkdown 走这条）
+
+## prosemirror-markdown
+
+在固定 `schema` 下，`defaultMarkdownParser.parse(md)` 把字符串变成 `Node`，`defaultMarkdownSerializer.serialize(doc)` 再导回去；`schema` 要和 parser 配套，别和上篇的 `editorSchema` 混用，除非你自己把两边节点定义对齐。
+
+底层是 **markdown-it**（`commonmark`，默认 `html: false`）。
+
+```typescript
+import {
+  schema,
+  defaultMarkdownParser,
+  defaultMarkdownSerializer,
+} from "prosemirror-markdown";
+
+const state = EditorState.create({
+  doc: defaultMarkdownParser.parse("# Title\n\nHello **world**"),
+  plugins: exampleSetup({ schema, menuBar: true }),
+});
+
+const md = defaultMarkdownSerializer.serialize(view.state.doc);
+```
+
+`exampleSetup` 传入的 `schema` 必须和 parser 是同一套——用 markdown 包自带的 `schema`，不要和上篇示例里的 `editorSchema` 硬凑。
+
+能力边界要心里有数：以 **CommonMark** 为主；GFM 表格、任务列表得自己扩 schema 和 parser。编辑一圈再导出，Markdown 未必和原文逐字相同（round-trip 要测）。
+
+和上篇的对应关系很直接：`createInitialDoc()` 换成 `parse(file)`；侧栏除了 JSON 也可以挂一份 Markdown 调试；`editorSchema` 换成 markdown 包的 `schema`。可以在 `playground/pm` 另开 `src/editor/markdown.ts` 试，不必先把学习用的最小代码拆掉。
+
+## remark / unified
+
+**remark** 处理的是 **mdast**（Markdown AST），不是 ProseMirror 的 Node：
+
+```text
+.md → remark-parse → mdast →（转换）→ ProseMirror Node → View → DOM
+```
+
+`remark-gfm`、`remark-frontmatter` 等和 Astro、Next 静态站是同一套生态；lint、MDX 也多半从这边接。
+
+和 prosemirror-markdown 比：前者 AST 直接是 PM `Node`，接 PM 官方配套；GFM 要自己扩。remark 这边 mdast 成熟，但要 **转换层** 或框架（Milkdown）才能进编辑器；和静态站、内容流水线对齐则 remark 更顺手。
+
+## Milkdown 站哪
+
+**Milkdown** 大致是 ProseMirror（编辑） + remark（Markdown 语义） + 插件系统，产品定位就是 Typora 式 WYSIWYG Markdown。
+
+我自己的顺序是：`playground/pm` 把 PM 三层跑顺 → 用 `prosemirror-markdown` 摸一遍最小 MD 闭环 → 真要产品化再评估 Milkdown 还是自研 remark ↔ PM。和 TipTap 的取舍见 [Milkdown 与 TipTap 对比](/notes/milkdown-vs-tiptap)。
+
+## 做 Web Typora 还要补什么
+
+`playground/pm` 现在只有基础 schema、菜单、部分 input rules，侧栏是 JSON 调试——离 Typora 还差一截。
+
+GFM 表格、任务列表：`remark-gfm` 或扩展 parser。公式：KaTeX + NodeView。代码块：Shiki 或 CodeMirror NodeView，别长期停在纯文本 `code_block`。Mermaid 要自定义 block。无分栏 WYSIWYG 靠更多 InputRule 和块级渲染，不是换个皮肤。持久化从 `doc.toJSON()` 换成 parse/serialize 写回 `.md`。框架层最终多半落在 Milkdown 或 TipTap，裸 PM 适合学习和定制点。
+
+接上 Markdown 之后，数据流会变成：
+
+```text
+  .md 文件
+     │  parse（prosemirror-markdown 或 remark→PM）
+     ▼
+  EditorState.doc  ◄──── Transaction
+     │                      │
+     ▼                      │
+  DOM                       │
+     │  serialize            │
+     ▼                      │
+  .md / 预览 ◄──────────────┘
+```
+
+## 7. 学习资源
+
+| 资源 | 链接 |
+|------|------|
+| ProseMirror Guide | [Guide](https://prosemirror.net/docs/guide/) |
+| prosemirror-markdown | [GitHub](https://github.com/ProseMirror/prosemirror-markdown) |
+| remark | [remark.js.org](https://remark.js.org) |
+| Milkdown | [milkdown.dev](https://milkdown.dev) |
+| 本仓库 playground | `web-typora/playground/pm` |
+
+推荐阅读：官方 Guide（Schema、Transform）→ 上篇 + 本地 `vp dev` → 本文 → [技术选型](/notes/web-typora-tech-stack)。
+
+## 系列目录
+
+1. [技术选型调研](/notes/web-typora-tech-stack)  
+2. [Milkdown 与 TipTap](/notes/milkdown-vs-tiptap)  
+3. [ProseMirror 入门（上）](/notes/prosemirror-basics)  
+4. 本文  

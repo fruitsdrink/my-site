@@ -1,0 +1,156 @@
+---
+title: ProseMirror 入门（上）：内核与最小示例
+description: Model / State / View、核心概念与 web-typora playground 最小代码对照；先不碰 Markdown。
+pubDate: 2026-05-21
+tags: [web-typora, prosemirror, editor, tutorial]
+draft: false
+series: web-typora
+seriesOrder: 3
+---
+
+> 配套代码：`web-typora/playground/pm`，`cd playground/pm && vp dev`。  
+> 建议先读完这篇，再看 [Markdown 管线（下）](/notes/prosemirror-markdown-pipeline)。
+
+## ProseMirror 是什么
+
+**ProseMirror** 是一套用来搭 **富文本 / 结构化文档编辑器** 的 JavaScript 库，不是 `import` 一下就能用的单文件组件。Schema、Transaction、View 自己拼；撤销、快捷键、输入规则靠插件往上叠。Milkdown、TipTap 都是在这套东西上面做的产品壳。
+
+官网：[prosemirror.net](https://prosemirror.net)
+
+## 为什么不用 contenteditable 或分栏预览
+
+裸 `contenteditable` 的撤销、粘贴、结构化选区很难控稳。左边 Markdown、右边 HTML 预览，编辑区本身不是 WYSIWYG——和 Typora 要的不是一条路。
+
+ProseMirror 维护一棵 **Node 树**，再映射到 DOM；改文档走 Transaction，而不是直接改 innerHTML。Markdown 的读写在后面单独做导入/导出，不属于 PM 内核。
+
+## 三层怎么叠
+
+```text
+prosemirror-model     Schema · Node · Mark（树结构）
+        ↓
+prosemirror-state     EditorState · Transaction · Plugin
+        ↓
+prosemirror-view      EditorView → DOM
+```
+
+记法很简单：**Model 管结构，State 管快照，View 管界面**。
+
+## 几个绕不开的概念
+
+**Schema** 规定文档里能有什么：块级 Node（段落、标题、列表）、行内 Mark（加粗、链接），以及谁可以嵌在谁里面。
+
+**Node 树** 从根 `doc` 展开；正文是块，块里是带 Mark 的 text。调试时常用 `doc.textContent`、`doc.toJSON()`。
+
+**EditorState** 某一帧的 `doc` + `selection` + 各插件的私有状态。它是不可变的：每次改动画 `newState = oldState.apply(tr)`，不要原地改 `doc`。
+
+**Transaction** 一次原子修改——按键、菜单命令、协作补丁最后都落成它。
+
+**EditorView** 把 State 画到 DOM，并在 `dispatchTransaction` 里接 Transaction：
+
+```typescript
+dispatchTransaction(tr) {
+  const next = view.state.apply(tr);
+  view.updateState(next);
+}
+```
+
+**Plugin / Command** 扩展行为；`toggleBold` 这类 Command 内部还是 dispatch Transaction。`exampleSetup()` 把菜单、history、keymap 等常用插件打成一个包，学习时省事，产品里往往会拆细。
+
+## 按一次键发生了什么
+
+```text
+keydown → View → Transaction → apply → updateState → 更新 DOM
+（可选）doc.toJSON() → 调试或持久化
+```
+
+真相源是 **`EditorState.doc` 这棵 Node 树**，不是 DOM，也不是 Markdown 字符串。
+
+## playground 里最小能跑什么
+
+示例 **故意没接** `prosemirror-markdown`，先把 PM 本身看清楚。
+
+- `src/editor/schema.ts`：`schema-basic` + `schema-list` 合成 `editorSchema`
+- `src/editor/initial-doc.ts`：用 `schema.node()` 手写初始树
+- `src/editor/ProseMirrorEditor.tsx`：创建 State、挂 View、`dispatchTransaction`
+- `src/App.tsx`：侧栏实时刷 **Document JSON**
+
+### Schema
+
+```typescript
+import { Schema } from "prosemirror-model";
+import { schema as basicSchema } from "prosemirror-schema-basic";
+import { addListNodes } from "prosemirror-schema-list";
+
+export const editorSchema = new Schema({
+  nodes: addListNodes(basicSchema.spec.nodes, "paragraph block*", "block"),
+  marks: basicSchema.spec.marks,
+});
+```
+
+### 手写初始 doc
+
+```typescript
+export function createInitialDoc(schema: Schema): Node {
+  return schema.node("doc", null, [
+    schema.node("heading", { level: 1 }, [schema.text("Hello ProseMirror")]),
+    schema.node("paragraph", null, [
+      schema.text("raw ProseMirror", [schema.marks.strong.create()]),
+    ]),
+    // ...
+  ]);
+}
+```
+
+### State + View
+
+```typescript
+const state = EditorState.create({
+  doc: createInitialDoc(editorSchema),
+  plugins: exampleSetup({ schema: editorSchema, menuBar: true }),
+});
+
+const view = new EditorView(host, {
+  state,
+  dispatchTransaction(transaction) {
+    const next = view.state.apply(transaction);
+    view.updateState(next);
+    onDocJsonChange?.(next.doc.toJSON());
+  },
+});
+```
+
+React 里记得在卸载时 **`view.destroy()`**，否则监听和 DOM 会漏。
+
+## 最小示例用到的包
+
+`prosemirror-model`（Schema、Node）、`prosemirror-state` / `transform`（State、Transaction）、`prosemirror-view`（EditorView）、`prosemirror-schema-basic` / `schema-list`（默认结构）、`prosemirror-example-setup`（菜单和常用插件）。
+
+`prosemirror-markdown` 在依赖里但示例没引——打开/保存 `.md` 留到 [下篇](/notes/prosemirror-markdown-pipeline)。
+
+## 建议自己动手的顺序
+
+1. 改 `initial-doc.ts`，对照侧栏 JSON 看树怎么变  
+2. 去掉 `exampleSetup`，只留 history + keymap，感受「功能从哪来」  
+3. 写 **InputRule**（例如 `## ` 变标题）  
+4. 绑 **Command** + `Mod-b` 加粗  
+5. （选做）**NodeView**：代码高亮、公式、Mermaid  
+6. 再读下篇，接 Markdown 的打开和保存  
+
+Selection、Decoration、剪贴板、Yjs、自定义 Schema（公式、脚注）等，等 Markdown 闭环跑通后再挖也不迟。
+
+## 当前数据流（对照用）
+
+```text
+createInitialDoc(schema)
+       ↓
+EditorState.doc  ◄── Transaction
+       ↓
+     DOM
+       ↓
+  doc.toJSON()（侧栏）
+```
+
+## 相关
+
+- [技术选型](/notes/web-typora-tech-stack) · [Milkdown vs TipTap](/notes/milkdown-vs-tiptap)
+- [ProseMirror 与 Markdown 管线（下）](/notes/prosemirror-markdown-pipeline)

@@ -1,0 +1,55 @@
+---
+title: Milkdown 与 TipTap 对比
+description: Web Typora 两条 ProseMirror 上层路线——各自怎么接 Markdown、默认像什么、怎么选。
+pubDate: 2026-05-21
+tags: [web-typora, prosemirror, milkdown, tiptap, editor]
+draft: false
+series: web-typora
+seriesOrder: 2
+---
+
+Milkdown 和 TipTap 都站在 **ProseMirror** 上面，差别在于谁是一等公民：Markdown 还是富文本文档。
+
+**Milkdown** 从 Typora 那条路走过来——Markdown 优先的 WYSIWYG，解析走 **remark / unified**，开箱更接近「打开就是 `.md`」。
+
+**TipTap** 是通用富文本框架，文档的常态是 ProseMirror 的 JSON；Markdown 靠 **@tiptap/markdown** 和 marked 按需 import/export，默认气质更像 Notion，要 Typora 感得自己堆扩展。
+
+## 数据怎么走
+
+```text
+Milkdown:
+  用户输入 → remark AST ↔ ProseMirror doc → WYSIWYG
+
+TipTap:
+  用户输入 → ProseMirror doc（JSON 当真相源）
+            ↔ @tiptap/markdown 按需 import/export
+```
+
+Milkdown 编辑过程中 remark 和 PM 树会来回对齐；TipTap 平时改的是 PM 树，存盘或导出时才碰 Markdown 字符串。
+
+## 几条实际差异
+
+Markdown 在 Milkdown 里是主线，GFM、round-trip 和静态站（remark 生态）比较好对齐。TipTap 也能写 Markdown，但要装 extension，而且 `getMarkdown()` 和原文是否一致，得自己写够测试——别假设「能导出就行」。
+
+Typora 那种无分栏、块内直接渲染，Milkdown 更贴；TipTap 要做类似体验，InputRule、NodeView、块菜单都要补一圈。
+
+扩展方面，Milkdown 用 composable 插件（`$prose` 等）；TipTap 的 Extension API 和周边案例更多，协作有 Tiptap Cloud、Hocuspocus，AI 相关官方材料也集中在这边。Milkdown 能接 Yjs，但现成的协作故事少一些。
+
+## 做 Web Typora 怎么选
+
+目标是 **GFM + 无分栏 WYSIWYG，磁盘上就是 `.md`** → 我会先 Milkdown。
+
+形态更像 **Notion 块编辑**，或者 v1 就要协作、评论、官方 AI 套件，又或者团队已经在用 TipTap → TipTap 更省事。
+
+不想内核绑死的话，v1 仍可用 Milkdown，外面包一层 `EditorAdapter`，以后换 TipTap 或裸 PM 时少动业务代码。
+
+## 和裸 ProseMirror 的关系
+
+要掌控每一层行为，裸 PM 或 Milkdown + 自写插件都行。如果只引 `prosemirror-*` 从零搭 remark 管线 + GFM + 无分栏体验，工期往往接近重做 Milkdown 内核，小团队一般不划算。
+
+拿不准的话，先跟 [ProseMirror 入门](/notes/prosemirror-basics) 把三层摸一遍，再回来评估 Milkdown 够不够省时间。
+
+## 相关
+
+- [技术选型调研](/notes/web-typora-tech-stack)
+- [ProseMirror 入门](/notes/prosemirror-basics)

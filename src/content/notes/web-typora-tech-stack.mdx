@@ -1,0 +1,74 @@
+---
+title: Web Typora 技术选型调研
+description: 浏览器版 Typora 的编辑器、Markdown 管线、应用栈与存储——首轮调研笔记。
+pubDate: 2026-05-21
+tags: [web-typora, markdown, editor, research]
+draft: false
+series: web-typora
+seriesOrder: 1
+---
+
+## 背景
+
+想做一个 **Web 版 Typora**：编辑时就是成品样式，底层仍是 Markdown；要 GFM、公式和图表、主题与导出。这篇把第一轮调研的结论记下来。代码实验放在独立仓库 `web-typora` 的 `playground/pm`。
+
+## 产品要解决什么
+
+Typora 那种体验，不是「左边源码、右边预览」的分栏。光标所在行直接渲染成标题、列表、公式块——**所见即所得**，但文件语义还是 Markdown，不是富文本 JSON。
+
+习惯上大家按 **GFM**（GitHub Flavored Markdown）写：表格、`- [x]` 任务列表、`~~删除线~~` 等。这块不能靠「差不多能渲染」糊弄，编辑和导出得一致。
+
+公式、代码高亮、Mermaid 走插件化的渲染管线；主题、导出、本地打开文件则落在 UI 和可选的浏览器 API 上。
+
+## 推荐技术栈
+
+```text
+React 18 + TypeScript + Vite+（vp dev / vp check）
+  └── 编辑器：Milkdown 或裸 ProseMirror（学习 / 定制用）
+  └── Markdown：remark/unified 或 prosemirror-markdown
+  └── 富内容：KaTeX、Shiki、Mermaid
+  └── 状态：Zustand（应用 UI）
+  └── 本地：File System Access API + IndexedDB 草稿
+```
+
+应用壳用 [Vite+](https://viteplus.dev) 把 dev、check、build 收在一套命令里；`playground/pm` 已经用 `vp create vite:application` 搭好了。
+
+## 编辑器路线
+
+底层绕不开 **ProseMirror**。上层常见三条路：
+
+- **Milkdown**：PM + remark，产品气质最接近 Typora。想尽快做出「打开就是 `.md`」的体验，我会先从这里试。
+- **TipTap**：PM + Extension，富文本和块编辑生态更熟；Markdown 要额外配，更像 Notion 而不是 Typora。
+- **裸 ProseMirror**：每一层自己控。适合搞懂内核，或者定制需求已经超出框架边界。系列后两篇会顺着 `playground/pm` 往下拆。
+
+**不建议** 用 `contenteditable` 拼 marked 预览——双向同步和选区问题会拖很久。也别把 Monaco 当主编辑器，那是 IDE 路线，不是写作工具。
+
+更细的对比见 [Milkdown 与 TipTap](/notes/milkdown-vs-tiptap)。
+
+## Markdown 与解析
+
+编辑态和文档树之间的往返，Milkdown 自带 remark 管线；自己搭 PM 可以用 `prosemirror-markdown`（偏 CommonMark，GFM 要补插件）。
+
+导出、以及和本站 Astro 内容对齐时，倾向 **remark + rehype** 共用 AST，少维护两套规则。公式用 **KaTeX**（够快）；代码块 **Shiki**；图表 **Mermaid** 放客户端即可。
+
+## 存储与后端
+
+一期可以全是静态前端：本地读写走 **File System Access API**，不支持的环境降级成下载保存；未保存的草稿丢 **IndexedDB**。
+
+同步、账号、多端协作留到后面，需要再上 BaaS 或自建 API。协作如果不在 v1 范围，就别提前把 Yjs 接进来——复杂度和测试面都会上去。
+
+## 几个早点拍板的事
+
+**无分栏、光标处渲染是不是硬需求？** 是的话，PM 系基本定了；若可以接受分栏，CodeMirror 6 + 浮动预览是另一条路，体验和 Typora 差一截。
+
+**v1 要不要协作？** 不要就别为 Yjs 改架构。
+
+**要不要用户插件？** 要的话，沙箱和插件 API 得在一开始留口子。
+
+**要不要 MDX？** 要就偏向 mdxeditor / remark-mdx，和纯 GFM 不是同一条产品线。
+
+## 本系列其它文章
+
+- [Milkdown 与 TipTap 对比](/notes/milkdown-vs-tiptap)
+- [ProseMirror 入门（上）](/notes/prosemirror-basics)
+- [ProseMirror 与 Markdown 管线（下）](/notes/prosemirror-markdown-pipeline)
