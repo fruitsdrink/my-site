@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { isPublished } from '../../lib/collections';
 
 export const GET: APIRoute = async ({ site }) => {
-  const origin = site?.toString().replace(/\/$/, '') ?? 'https://mostack.fruitsdrink.workers.dev';
+  const origin = site?.toString().replace(/\/$/, '') ?? 'https://mostack.vercel.app';
   const entries = (await getCollection('palettes')).filter(isPublished);
 
   const list = entries.map((entry) => ({

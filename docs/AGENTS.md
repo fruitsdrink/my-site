@@ -35,7 +35,7 @@
 - **主题：** 默认明亮；明亮 / 暗黑 / 系统
 - **页脚：** `SiteFooter` + `site.config.ts` 的 `social`
 - **RSS：** v1 无
-- **部署：** Cloudflare Workers — `https://mostack.fruitsdrink.workers.dev`
+- **部署：** Vercel 静态站 — `https://mostack.vercel.app`（`vercel.json` 使用 `npm run build` → `dist`，含 Pagefind）
 
 ## 配色引用（重要）
 

@@ -310,7 +310,27 @@ usage: 可选
 | 改资源筛选枚举 | `src/lib/resources.ts` + `content.config.ts` + **本文第三节、第四节** |
 | 预览 | `npm run dev` |
 | 发布前 | `npm run check:palettes` → `npm run build`（构建已含检查 + Pagefind） |
+| 部署 Vercel | 见下文「Vercel 部署」；`astro.config.mjs` 的 `site` 须与生产域名一致 |
 | **改路由/集合/壳子** | **同步更新本文 + [AGENTS.md](AGENTS.md)** |
+
+### Vercel 部署
+
+静态 Astro 站，**无需** `@astrojs/vercel` 适配器。仓库根目录 `vercel.json` 指定：
+
+| 项 | 值 |
+|----|-----|
+| Build Command | `npm run build`（含 palette 检查 + Pagefind，勿仅用 `astro build`） |
+| Output Directory | `dist` |
+| Node | `package.json` → `engines.node`（≥ 22.12） |
+
+**首次接入：**
+
+1. [vercel.com](https://vercel.com) → Import Git Repository → 选本仓库
+2. Framework Preset 选 **Astro**（或 Other）；确认 Build / Output 与上表一致
+3. Deploy；生产域名写入 `astro.config.mjs` → `site`（自定义域名在 Vercel Domains 绑定后同步修改）
+4. 之后 `main` 推送自动部署
+
+本地 CLI（可选）：`npx vercel` / `npx vercel --prod`
 
 ---
 
@@ -321,7 +341,7 @@ usage: 可选
 | 框架 | Astro 6，静态站 |
 | 首页 | E 门户（六入口）+ 最近动态 |
 | 站名 | 临时 **墨栈** |
-| 部署 | **Cloudflare Workers**，`https://mostack.fruitsdrink.workers.dev`（`astro.config.mjs` → `site`） |
+| 部署 | **Vercel** 静态托管，`https://mostack.vercel.app`（`astro.config.mjs` → `site`；见第五节 Vercel 部署） |
 | CSS | Tailwind |
 | 默认主题 | **明亮** |
 | 主题切换 | 明亮 / 暗黑 / 系统 |
