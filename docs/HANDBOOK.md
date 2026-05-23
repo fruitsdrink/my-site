@@ -22,17 +22,17 @@ Agent 与人类维护者均遵守；PR / 提交前对照上表自检。
 
 ## 一、整体怎么分模块
 
-站点 = **一个 Astro 静态站** + **五类内容（Content Collections）** + **壳子（导航 / 主题 / 搜索 / 页脚）**。
+站点 = **一个 Astro 静态站** + **六类内容（Content Collections）** + **壳子（导航 / 主题 / 搜索 / 页脚）**。
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  壳子：布局 / 导航 / 主题 / 搜索 / 页脚(社交链接)        │
-├─────────────────────────────────────────────────────────┤
-│  首页 (E)：五入口 + 「最近动态」混排                      │
-├──────────┬──────────┬──────────┬──────────┬────────────┤
-│  notes   │  docs    │ projects │ resources│  palettes  │
-│  笔记    │  文档    │  作品    │  资源    │  配色      │
-└──────────┴──────────┴──────────┴──────────┴────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  壳子：布局 / 导航 / 主题 / 搜索 / 页脚(社交链接)                  │
+├──────────────────────────────────────────────────────────────────┤
+│  首页 (E)：六入口 + 「最近动态」混排                                │
+├─────────┬─────────┬──────────┬─────────────┬──────────┬────────┤
+│  notes  │  docs   │ projects │ discoveries │resources │palettes│
+│  笔记   │  文档   │  作品    │  开源发现   │  资源    │  配色  │
+└─────────┴─────────┴──────────┴─────────────┴──────────┴────────┘
 ```
 
 | 模块 | 用途 | 典型内容 | 列表 | 详情页 |
@@ -40,7 +40,8 @@ Agent 与人类维护者均遵守；PR / 提交前对照上表自检。
 | **notes** | 开发/学习随记、踩坑、短文 | 今天试了 Convex | `/notes` | 有 |
 | **docs** | 系统整理、对比、教程笔记 | Auth 选型、部署备忘 | `/docs` | 有（TOC 由 meta 控制） |
 | **projects** | 个人开发与开源作品 | chronovia-desk | `/projects` | 有 |
-| **resources** | 发现的库/服务/工具/npm | Clerk、nuqs、Pexels | `/resources` | **无单条详情**；有类型/分类筛选页 |
+| **discoveries** | 别人维护的开源仓库/产品 | 花笺 floral-notepaper | `/discoveries` | **无单条详情** |
+| **resources** | 开发用库/服务/npm/参考站 | Clerk、nuqs、Pexels | `/resources` | **无单条详情**；有类型/分类筛选页 |
 | **palettes** | 收藏的中国色/参考配色 | 只此青绿 | `/palettes` | **无（v1 仅列表）** |
 
 ### 站点主题 vs 配色收藏（必须分离）
@@ -68,6 +69,7 @@ src/
     notes/*.mdx
     docs/*.mdx
     projects/*.mdx
+    discoveries/*.md           # 开源发现
     resources/**/*.md          # 可用子目录，如 inspiration/
     palettes/*.md
   content.config.ts
@@ -80,6 +82,7 @@ src/
   components/
     SiteHeader.astro
     SiteFooter.astro
+    DiscoveriesTable.astro
     ResourcesTable.astro
     ResourcesFilterBar.astro
   pages/
@@ -88,6 +91,7 @@ src/
     docs/...
     projects/index.astro
     projects/[...slug].astro
+    discoveries/index.astro
     resources/index.astro
     resources/type/[type].astro
     resources/category/[category].astro
@@ -99,6 +103,7 @@ src/
   lib/
     collections.ts
     feed.ts
+    discoveries.ts             # 开源发现排序、状态文案
     resources.ts               # 筛选 URL、枚举、排序
   styles/global.css
 public/
@@ -173,7 +178,32 @@ draft: false 可选
 
 ---
 
-### 4. `resources` — 资源
+### 4. `discoveries` — 开源发现
+
+```yaml
+title: (必填)
+description: (必填)
+github: (必填) 仓库 URL
+stack: [] 可选
+status: (必填) bookmarked | tried | using | deprecated
+discoveredFrom: 可选
+discoveredAt: (必填)
+introUrl: 可选  作品介绍/演示视频
+license: 可选  如 MIT
+tags: [] 可选
+searchKeywords: [] 可选
+draft: false 可选
+```
+
+**列表：** 表格（名称链 GitHub、技术栈、状态、日期）；名称下可显示许可证、`introUrl`（介绍）、来源。**无单条详情页。**
+
+与 **projects**（个人作品）和 **resources**（npm/SaaS/图库等开发资源）分开收录。
+
+**更新：** `src/content/discoveries/<slug>.md`，模板 [templates/discovery.md](templates/discovery.md)
+
+---
+
+### 5. `resources` — 资源
 
 ```yaml
 title: (必填)
@@ -212,7 +242,7 @@ draft: false 可选
 
 ---
 
-### 5. `palettes` — 配色
+### 6. `palettes` — 配色
 
 ```yaml
 id: (必填) 稳定 slug
@@ -254,15 +284,15 @@ usage: 可选
 
 首页 **E · 门户分块**：
 
-- 上部：**五入口**（笔记 / 文档 / 作品 / 资源 / 配色），显示数量
-- 下部：**最近动态**，从 notes + docs + projects + resources 按日期降序取 N 条（`SITE.homeFeedLimit`）
+- 上部：**六入口**（笔记 / 文档 / 作品 / 开源发现 / 资源 / 配色），显示数量
+- 下部：**最近动态**，从 notes + docs + projects + discoveries + resources 按日期降序取 N 条（`SITE.homeFeedLimit`）
 
 | 列 | 来源 |
 |----|------|
 | 日期 | `pubDate` 或 `discoveredAt` |
-| 类型 | 笔记 / 文档 / 作品 / 资源 |
+| 类型 | 笔记 / 文档 / 作品 / 开源发现 / 资源 |
 | 标题 | `title` |
-| 链接 | 笔记、文档、作品 → 详情；资源 → `/resources` |
+| 链接 | 笔记、文档、作品 → 详情；开源发现 → `/discoveries`；资源 → `/resources` |
 
 ---
 
@@ -270,6 +300,7 @@ usage: 可选
 
 | 做什么 | 操作 |
 |--------|------|
+| 记开源仓库/产品 | `src/content/discoveries/<slug>.md`，[templates/discovery.md](templates/discovery.md) |
 | 记 npm/服务 | `src/content/resources/<slug>.md`，[templates/resource.md](templates/resource.md) |
 | 写笔记 | `src/content/notes/<slug>.mdx`，[templates/note.mdx](templates/note.mdx) |
 | 写文档 | `src/content/docs/<slug>.mdx`，[templates/doc.mdx](templates/doc.mdx) |
@@ -288,17 +319,18 @@ usage: 可选
 | 项目 | 定案 |
 |------|------|
 | 框架 | Astro 6，静态站 |
-| 首页 | E 门户（五入口）+ 最近动态 |
+| 首页 | E 门户（六入口）+ 最近动态 |
 | 站名 | 临时 **墨栈** |
 | 部署 | **Cloudflare Workers**，`https://mostack.fruitsdrink.workers.dev`（`astro.config.mjs` → `site`） |
 | CSS | Tailwind |
 | 默认主题 | **明亮** |
 | 主题切换 | 明亮 / 暗黑 / 系统 |
+| discoveries | 列表；**无单条详情** |
 | resources | 列表 + 类型/分类筛选；**无单条详情** |
 | palettes | 仅列表 + JSON；v1 无 HTML 详情 |
 | projects | 列表 + 详情 |
 | docs TOC | frontmatter `toc` |
-| 内容格式 | notes / docs / projects → MDX；resources / palettes → `.md` |
+| 内容格式 | notes / docs / projects → MDX；discoveries / resources / palettes → `.md` |
 | 搜索 | Pagefind（build 后） |
 | RSS / 评论 | v1 无 |
 | 语言 | 中文为主 |
@@ -329,4 +361,4 @@ usage: 可选
 | 文件 | 说明 |
 |------|------|
 | [AGENTS.md](AGENTS.md) | AI 协作约定（含文档同步） |
-| [templates/](templates/) | 五类内容复制模板 |
+| [templates/](templates/) | 六类内容复制模板 |

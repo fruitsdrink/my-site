@@ -86,6 +86,26 @@ const resources = defineCollection({
   }),
 });
 
+/** 发现的开源仓库 / 开源产品（非个人作品、非 npm/SaaS 资源条） */
+const discoveries = defineCollection({
+  loader: glob({ base: './src/content/discoveries', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    github: z.string().url(),
+    stack: z.array(z.string()).default([]),
+    status: z.enum(['bookmarked', 'tried', 'using', 'deprecated']),
+    discoveredFrom: z.string().optional(),
+    discoveredAt: z.coerce.date(),
+    /** 作品介绍、演示视频等 */
+    introUrl: z.string().url().optional(),
+    license: z.string().optional(),
+    tags: z.array(z.string()).default([]),
+    searchKeywords: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+});
+
 const projects = defineCollection({
   loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
@@ -132,4 +152,4 @@ const palettes = defineCollection({
   }),
 });
 
-export const collections = { notes, docs, resources, projects, palettes };
+export const collections = { notes, docs, resources, projects, discoveries, palettes };

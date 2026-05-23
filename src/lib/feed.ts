@@ -1,12 +1,13 @@
 import { formatDate } from './dates';
 import {
+  getPublishedDiscoveries,
   getPublishedDocs,
   getPublishedNotes,
   getPublishedProjects,
   getPublishedResources,
 } from './collections';
 
-export type FeedKind = 'notes' | 'docs' | 'projects' | 'resources';
+export type FeedKind = 'notes' | 'docs' | 'projects' | 'discoveries' | 'resources';
 
 export interface FeedItem {
   kind: FeedKind;
@@ -21,6 +22,7 @@ const kindLabels: Record<FeedKind, string> = {
   notes: '笔记',
   docs: '文档',
   projects: '作品',
+  discoveries: '开源发现',
   resources: '资源',
 };
 
@@ -28,12 +30,13 @@ export function getKindLabel(kind: FeedKind): string {
   return kindLabels[kind];
 }
 
-/** 首页「最近动态」：notes + docs + projects + resources，按日期降序 */
+/** 首页「最近动态」：notes + docs + projects + discoveries + resources，按日期降序 */
 export async function getHomeFeed(limit: number): Promise<FeedItem[]> {
-  const [notes, docs, projects, resources] = await Promise.all([
+  const [notes, docs, projects, discoveries, resources] = await Promise.all([
     getPublishedNotes(),
     getPublishedDocs(),
     getPublishedProjects(),
+    getPublishedDiscoveries(),
     getPublishedResources(),
   ]);
 
@@ -61,6 +64,14 @@ export async function getHomeFeed(limit: number): Promise<FeedItem[]> {
       dateLabel: formatDate(entry.data.pubDate),
       href: `/projects/${entry.id}`,
       badge: entry.data.tags[0],
+    })),
+    ...discoveries.map((entry) => ({
+      kind: 'discoveries' as const,
+      title: entry.data.title,
+      date: entry.data.discoveredAt,
+      dateLabel: formatDate(entry.data.discoveredAt),
+      href: '/discoveries',
+      badge: entry.data.status,
     })),
     ...resources.map((entry) => ({
       kind: 'resources' as const,

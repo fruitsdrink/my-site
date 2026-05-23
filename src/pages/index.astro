@@ -5,16 +5,18 @@ import { getHomeFeed, getKindLabel } from '../lib/feed';
 import {
   getPublishedDocs,
   getPublishedNotes,
+  getPublishedDiscoveries,
   getPublishedPalettes,
   getPublishedProjects,
   getPublishedResources,
 } from '../lib/collections';
 
-const [feed, notes, docs, projects, resources, palettes] = await Promise.all([
+const [feed, notes, docs, projects, discoveries, resources, palettes] = await Promise.all([
   getHomeFeed(SITE.homeFeedLimit),
   getPublishedNotes(),
   getPublishedDocs(),
   getPublishedProjects(),
+  getPublishedDiscoveries(),
   getPublishedResources(),
   getPublishedPalettes(),
 ]);
@@ -23,8 +25,9 @@ const portals = [
   { href: '/notes', label: '笔记', count: notes.length, num: '01' },
   { href: '/docs', label: '文档', count: docs.length, num: '02' },
   { href: '/projects', label: '作品', count: projects.length, num: '03' },
-  { href: '/resources', label: '资源', count: resources.length, num: '04' },
-  { href: '/palettes', label: '配色', count: palettes.length, num: '05' },
+  { href: '/discoveries', label: '开源发现', count: discoveries.length, num: '04' },
+  { href: '/resources', label: '资源', count: resources.length, num: '05' },
+  { href: '/palettes', label: '配色', count: palettes.length, num: '06' },
 ];
 ---
 
@@ -34,7 +37,7 @@ const portals = [
     <p class="mt-2 text-muted">{SITE.description}</p>
   </section>
 
-  <nav class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" aria-label="内容入口">
+  <nav class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" aria-label="内容入口">
     {portals.map((p) => (
       <a
         href={p.href}
@@ -50,11 +53,13 @@ const portals = [
   <section>
     <h2 class="mb-4 border-b border-border pb-2 font-display text-lg font-bold">
       最近动态
-      <span class="ml-2 font-sans text-xs font-normal text-muted">notes · docs · projects · resources</span>
+      <span class="ml-2 font-sans text-xs font-normal text-muted">
+        notes · docs · projects · discoveries · resources
+      </span>
     </h2>
     <div class="rounded border border-border bg-card">
       {feed.length === 0 ? (
-        <p class="p-6 text-muted">暂无内容，在 src/content/ 下添加笔记、文档或资源。</p>
+        <p class="p-6 text-muted">暂无内容，在 src/content/ 下添加笔记、文档、开源发现或资源。</p>
       ) : (
         <ul>
           {feed.map((item) => (

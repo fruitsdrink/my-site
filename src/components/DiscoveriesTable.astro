@@ -1,0 +1,79 @@
+---
+import { formatDate } from '../lib/dates';
+import { statusLabel, type DiscoveryEntry } from '../lib/discoveries';
+
+interface Props {
+  discoveries: DiscoveryEntry[];
+}
+
+const { discoveries } = Astro.props;
+---
+
+{
+  discoveries.length === 0 ? (
+    <p class="text-muted">还没有收录的开源发现。</p>
+  ) : (
+    <div class="overflow-x-auto rounded border border-border bg-card">
+      <table class="w-full min-w-[640px] text-left text-sm">
+        <thead>
+          <tr class="border-b border-border text-xs text-muted">
+            <th class="px-4 py-3 font-medium">名称</th>
+            <th class="px-4 py-3 font-medium">技术栈</th>
+            <th class="whitespace-nowrap px-4 py-3 font-medium">状态</th>
+            <th class="whitespace-nowrap px-4 py-3 font-medium">日期</th>
+          </tr>
+        </thead>
+        <tbody>
+          {discoveries.map((entry) => (
+            <tr class="border-b border-border last:border-b-0 hover:bg-bg/50">
+              <td class="px-4 py-3">
+                <a
+                  href={entry.data.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-medium text-fg hover:text-accent"
+                >
+                  {entry.data.title}
+                </a>
+                <p class="mt-0.5 text-xs text-muted">{entry.data.description}</p>
+                <p class="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+                  {entry.data.license && (
+                    <span class="font-mono text-muted">{entry.data.license}</span>
+                  )}
+                  {entry.data.introUrl && (
+                    <a
+                      href={entry.data.introUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-accent hover:underline"
+                    >
+                      介绍
+                    </a>
+                  )}
+                  {entry.data.discoveredFrom && (
+                    <span class="text-muted">来自 {entry.data.discoveredFrom}</span>
+                  )}
+                </p>
+              </td>
+              <td class="px-4 py-3">
+                {entry.data.stack.length > 0 ? (
+                  <span class="font-mono text-xs text-muted">{entry.data.stack.join(' · ')}</span>
+                ) : (
+                  <span class="text-xs text-muted">—</span>
+                )}
+              </td>
+              <td class="whitespace-nowrap px-4 py-3">
+                <span class="inline-block whitespace-nowrap rounded border border-border px-2 py-0.5 text-xs text-accent">
+                  {statusLabel[entry.data.status] ?? entry.data.status}
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-muted">
+                {formatDate(entry.data.discoveredAt)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
