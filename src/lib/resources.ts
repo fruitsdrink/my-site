@@ -45,6 +45,7 @@ export async function getSortedResources(): Promise<ResourceEntry[]> {
 export interface ResourceFilters {
   type?: ResourceType;
   category?: ResourceCategory;
+  tag?: string;
 }
 
 /** 按类型、分类组合筛选（未传的维度不限制） */
@@ -55,12 +56,24 @@ export function filterResources(
   return resources.filter((entry) => {
     if (filters.type && entry.data.type !== filters.type) return false;
     if (filters.category && entry.data.category !== filters.category) return false;
+    if (filters.tag) {
+      const tags = entry.data.tags ?? [];
+      if (!tags.includes(filters.tag)) return false;
+    }
     return true;
   });
 }
 
-/** 生成筛选页 URL，用于链接与移除条件 */
+/** 生成筛选页 URL，支持类型、分类和标签组合 */
 export function resourcesFilterUrl(filters: ResourceFilters): string {
+  if (filters.tag) {
+    if (filters.type && filters.category) {
+      return `/resources/type/${filters.type}/category/${filters.category}/tag/${filters.tag}`;
+    }
+    if (filters.type) return `/resources/type/${filters.type}/tag/${filters.tag}`;
+    if (filters.category) return `/resources/category/${filters.category}/tag/${filters.tag}`;
+    return `/resources/tag/${filters.tag}`;
+  }
   if (filters.type && filters.category) {
     return `/resources/type/${filters.type}/category/${filters.category}`;
   }

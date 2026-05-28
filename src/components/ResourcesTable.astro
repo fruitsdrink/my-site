@@ -2,7 +2,6 @@
 import { formatDate } from '../lib/dates';
 import {
   resourcesFilterUrl,
-  statusLabel,
   type ResourceEntry,
   type ResourceFilters,
 } from '../lib/resources';
@@ -32,7 +31,7 @@ const mutedClass = 'font-mono text-xs text-muted';
             <th class="px-4 py-3 font-medium">名称</th>
             <th class="px-4 py-3 font-medium">类型</th>
             <th class="px-4 py-3 font-medium">分类</th>
-            <th class="whitespace-nowrap px-4 py-3 font-medium">状态</th>
+            <th class="px-4 py-3 font-medium">标签</th>
             <th class="whitespace-nowrap px-4 py-3 font-medium">日期</th>
           </tr>
         </thead>
@@ -80,10 +79,29 @@ const mutedClass = 'font-mono text-xs text-muted';
                   </a>
                 )}
               </td>
-              <td class="whitespace-nowrap px-4 py-3">
-                <span class="inline-block whitespace-nowrap rounded border border-border px-2 py-0.5 text-xs text-accent">
-                  {statusLabel[entry.data.status] ?? entry.data.status}
-                </span>
+              <td class="px-4 py-3">
+                <div class="flex flex-wrap gap-1">
+                  {(entry.data.tags ?? []).map((tag) => {
+                    const tagHref = resourcesFilterUrl({
+                      type: activeType,
+                      category: activeCategory,
+                      tag,
+                    });
+                    return (
+                      <a
+                        href={tagHref}
+                        class:list={[
+                          'inline-block rounded border px-1.5 py-0.5 text-xs transition-colors',
+                          filters.tag === tag
+                            ? 'border-accent/40 bg-accent/10 text-accent'
+                            : 'border-border text-muted hover:border-accent/40 hover:text-accent',
+                        ]}
+                      >
+                        {tag}
+                      </a>
+                    );
+                  })}
+                </div>
               </td>
               <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-muted">
                 {formatDate(entry.data.discoveredAt)}
